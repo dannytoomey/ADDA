@@ -2,7 +2,7 @@
 %aDT(n) = n task, tTD(n) = 50/100% cue validity, tCD(n) = block, tBT = 8
 %every time because (8).thisTrialData has the complete trial data
 
-function stroopAL(sjNum)
+function stroopAL2(sjNum)
 
 load('dataInfo.mat');
 load(stroopLoad);
@@ -144,8 +144,8 @@ for task=1:numTask
             numResp=numel(lowToneResp)+numel(highToneResp);
             sortResps=[lowToneResp,highToneResp];
             resps=sort(sortResps);
-            rt=zeros(1,lowToneResp);
-            for count=1:numResp
+            rt=zeros(1,numel(lowToneResp));
+            for count=1:numel(lowToneResp)
                 if data(9,lowToneResp(1,count))~=0
                     rt(1,count)=data(10,lowToneResp(1,count));
                 end
