@@ -55,6 +55,9 @@ for task=1:numTask
         block7=allStroopTask(task).thisTaskData(cue).thisCondData(7).thisBlockTrials(8).thisTrialData;
         block8=allStroopTask(task).thisTaskData(cue).thisCondData(8).thisBlockTrials(8).thisTrialData;
         data = [block1,block2,block3,block4,block5,block6,block7,block8];
+        blockWM=allStroopTask(task).thisTaskData(cue).thisCondData(8).thisblockWM;
+        blockWMload=blockWM(1:5,:);
+        blockWMprobe=blockWM(6:10,:);
         trials = size(data,2);
         %determine if cueCond==1 or 2
         if data(5,1)==1
@@ -77,6 +80,10 @@ for task=1:numTask
                 blockID = 'strdu100';
             end
         end
+        
+        errorCom = 0;
+        errorOm = 0;
+        oriEf = 0;
         
         if taskCond==1
             resp = find(data(9,:)>0);
@@ -121,8 +128,6 @@ for task=1:numTask
             numCorrect = numel(correct);
             accuracy = numCorrect/trials;
             meanRT = mean(rt);
-
-            save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorOm','numCorrect','accuracy','meanRT');
             
         end
         if taskCond==2
@@ -186,10 +191,67 @@ for task=1:numTask
             numCorrect = numel(correct);
             accuracy = numCorrect/trials;
             meanRT = mean(rt);
-
-            save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorCom','errorOm','numCorrect','accuracy','meanRT');
             
         end
+        
+        %determine WMC
+
+        WMorder=zeros(size(blockWMload,1),size(blockWM,2));
+        for block=1:size(blockWM,2)
+            for letter=1:size(blockWMload,1)
+                if blockWMload(letter,block)==blockWMprobe(letter,block)
+                    WMorder(letter,block)=1;
+                end
+            end
+        end
+        
+        acWMorder=numel(find(WMorder==1))/numel(WMorder);
+        meanWMletter=zeros(1,size(blockWM,2));
+       
+        for block=1:size(blockWM,2)
+            letterInLoad=0;
+            thisBlockWM=blockWMload(:,block);
+            for letter=1:size(blockWMload,1)
+                resp=find(blockWMprobe(letter,block)==thisBlockWM);
+                if resp~=0
+                    letterInLoad=letterInLoad+1;
+                end
+                acLetter=letterInLoad/size(blockWMload,1);
+            end
+            meanWMletter(1,block)=acLetter;
+        end
+        
+        acWMletter=sum(meanWMletter)/numel(meanWMletter);
+        
+        %find orienting effect
+        
+        numValid=0;
+        numInvalid=0;
+        valTrials=zeros(1,trials);
+        invalTrials=zeros(1,trials);
+        if cueCond==1
+            for count=1:trials
+                if data(7,count)<600&&data(6,count)<=50
+                    numValid=numValid+1;
+                    valTrials(1,count)=data(10,count);
+                elseif 600<data(7,count)&&50<data(6,count)
+                    numValid=numValid+1;
+                    valTrials(1,count)=data(10,count);
+                elseif data(7,count)<600&&50<data(6,count)
+                    numInvalid=numInvalid+1;
+                    invalTrials(1,count)=data(10,count);
+                elseif 600<data(7,count)&&data(5,count)<=50
+                    numInvalid=numInvalid+1;
+                    invalTrials(1,count)=data(10,count);
+                end
+            end
+            valTrialsRT=sum(valTrials)/sum(valTrials~=0,2);
+            invalTrialsRT=sum(invalTrials)/sum(invalTrials~=0,2);
+            oriEf=invalTrialsRT-valTrialsRT;
+        end
+            
+        save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorCom','errorOm','numCorrect','accuracy','meanRT','acWMorder','acWMletter','oriEf');
+        
     end
 end
 

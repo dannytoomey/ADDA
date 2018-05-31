@@ -1,4 +1,5 @@
-%loop to be used to create data files for different subjects
+
+%loop used to create data files for different subjects
 %aDT(n) = n task, tTD(n) = 50/100% cue validity, tCD(n) = block, tBT = 8
 %every time because (8).thisTrialData has the complete trial data
 
@@ -55,9 +56,14 @@ for task=1:numTask
         block7=allDotTask(task).thisTaskData(cue).thisCondData(7).thisBlockTrials(8).thisTrialData;
         block8=allDotTask(task).thisTaskData(cue).thisCondData(8).thisBlockTrials(8).thisTrialData;
         data = [block1,block2,block3,block4,block5,block6,block7,block8];
+        blockWM=allDotTask(task).thisTaskData(cue).thisCondData(8).thisBlockWM;
+        blockWMload=blockWM(1:5,:);
+        blockWMprobe=blockWM(6:10,:);
         trials = size(data,2);
         cueValid=zeros(1,trials);
+        
         %determine cueCond==1 or 2
+        
         for trial=1:trials
             if data(5,trial)<600
                 if data(1,trial)==0
@@ -79,7 +85,9 @@ for task=1:numTask
         elseif numel(numVal)==64
             cueCond=2;
         end
+        
         %determine blockID
+        
         if taskCond==1
             if cueCond==1
                 blockID = 'dotsi50';
@@ -93,6 +101,10 @@ for task=1:numTask
                 blockID = 'dotdu100';
             end
         end
+        
+        errorCom = 0;
+        errorOm = 0;
+        oriEf = 0;
         
         if taskCond==1
             resp = find(data(7,:)>0);
@@ -125,13 +137,10 @@ for task=1:numTask
             numCorrect = numel(correct);
             accuracy = numCorrect/trials;
             meanRT = mean(rt);
-
-            save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorOm','numCorrect','accuracy','meanRT');
             
         end
+        
         if taskCond==2
-            errorCom = 0;
-            errorOm = 0;
             for count=1:trials
                 if data(6,count)==600
                     if data(7,count)>0
@@ -181,12 +190,68 @@ for task=1:numTask
             numCorrect = numel(correct);
             accuracy = numCorrect/trials;
             meanRT = mean(rt);
-
-            save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorCom','errorOm','numCorrect','accuracy','meanRT');
             
         end
+        
+        %determine WMC
+
+        WMorder=zeros(size(blockWMload,1),size(blockWM,2));
+        for block=1:size(blockWM,2)
+            for letter=1:size(blockWMload,1)
+                if blockWMload(letter,block)==blockWMprobe(letter,block)
+                    WMorder(letter,block)=1;
+                end
+            end
+        end
+        
+        acWMorder=numel(find(WMorder==1))/numel(WMorder);
+        meanWMletter=zeros(1,size(blockWM,2));
+       
+        for block=1:size(blockWM,2)
+            letterInLoad=0;
+            thisBlockWM=blockWMload(:,block);
+            for letter=1:size(blockWMload,1)
+                resp=find(blockWMprobe(letter,block)==thisBlockWM);
+                if resp~=0
+                    letterInLoad=letterInLoad+1;
+                end
+                acLetter=letterInLoad/size(blockWMload,1);
+            end
+            meanWMletter(1,block)=acLetter;
+        end
+        
+        acWMletter=sum(meanWMletter)/numel(meanWMletter);
+        
+        %find orienting effect
+        
+        numValid=0;
+        numInvalid=0;
+        valTrials=zeros(1,trials);
+        invalTrials=zeros(1,trials);
+        if cueCond==1
+            for count=1:trials
+                if data(5,count)<600&&data(1,count)==0||data(2,count)==0
+                    numValid=numValid+1;
+                    valTrials(1,count)=data(8,count);
+                elseif 600<data(5,count)&&data(3,count)==0||data(4,count)==0
+                    numValid=numValid+1;
+                    valTrials(1,count)=data(8,count);
+                elseif data(5,count)<600&&data(1,count)==1&&data(2,count)==1
+                    numInvalid=numInvalid+1;
+                    invalTrials(1,count)=data(8,count);
+                elseif 600<data(5,count)&&data(3,count)==1&&data(4,count)==1
+                    numInvalid=numInvalid+1;
+                    invalTrials(1,count)=data(8,count);
+                end
+            end
+            valTrialsRT=sum(valTrials)/sum(valTrials~=0,2);
+            invalTrialsRT=sum(invalTrials)/sum(invalTrials~=0,2);
+            oriEf=invalTrialsRT-valTrialsRT;
+        end
+            
+        save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorCom','errorOm','numCorrect','accuracy','meanRT','acWMorder','acWMletter','oriEf');
+            
     end
 end
-
     
 return
