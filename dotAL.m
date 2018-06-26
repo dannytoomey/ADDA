@@ -47,6 +47,16 @@ for task=1:numTask
                 taskCond=2;
             end
         end
+        
+% %         % TOM
+% %         for i=1:8
+% %             data2(i,:,:) = allDotTask(task).thisTaskData(cue).thisCondData(i).thisBlockTrials(8).thisTrialData;
+% %         end
+% %         % this is an inefficient way to do it...use reshape or permute
+% %         % instead..!
+% %         data2 =[squeeze(data2(1,:,:)),squeeze(data2(2,:,:)),squeeze(data2(3,:,:)),squeeze(data2(4,:,:)),...
+% %             squeeze(data2(5,:,:)),squeeze(data2(6,:,:)),squeeze(data2(7,:,:)),squeeze(data2(8,:,:))];
+        
         block1=allDotTask(task).thisTaskData(cue).thisCondData(1).thisBlockTrials(8).thisTrialData;
         block2=allDotTask(task).thisTaskData(cue).thisCondData(2).thisBlockTrials(8).thisTrialData;
         block3=allDotTask(task).thisTaskData(cue).thisCondData(3).thisBlockTrials(8).thisTrialData;
@@ -248,10 +258,20 @@ for task=1:numTask
             invalTrialsRT=sum(invalTrials)/sum(invalTrials~=0,2);
             oriEf=invalTrialsRT-valTrialsRT;
         end
-            
+         
+% %         if task==1 &&& cue==1 && cueCond==1
+% %             dotdu50=trials;
+% %         elseif task==2 &&& cue==1 && cueCond==1
+% %             dotdu100=trials;
+% %         end
+        
         save([filePath '/' sprintf('sj%02d_%s.mat',sjNum,blockID)],'trials','errorCom','errorOm','numCorrect','accuracy','meanRT','acWMorder','acWMletter','oriEf');
             
     end
 end
+
+% % masterStruct.dotdu50 =dotdu50;
+% % masterStruct.dotdu100 = dotdu100; % etc....
+
     
 return
