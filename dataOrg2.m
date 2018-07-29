@@ -38,11 +38,12 @@ for sj=1:size(sjRange,2)
             elseif task==2
                 taskCond='du';
             end
+            %label cue 1 as 100% so that the graph shows 100 before 50
             for cue=1:numCue
                 if cue==1
-                    cueCond='50';
-                elseif cue==2
                     cueCond='100';
+                elseif cue==2
+                    cueCond='50';
                 end
 
                 file=['sj' sprintf('%d',sjNum) '_' sprintf('%s',visCond) sprintf('%s',taskCond) sprintf('%s',cueCond) '.mat'];
@@ -141,7 +142,7 @@ for var=1:numVars
     elseif vars2graph(1,var)==6
         varName='Accuracy';
     elseif vars2graph(1,var)==7
-        varName='Mean Response Time';
+        varName='Response Time';
     elseif vars2graph(1,var)==8
         varName='Working Memory Accuracy (letters in order)';
     elseif vars2graph(1,var)==9
