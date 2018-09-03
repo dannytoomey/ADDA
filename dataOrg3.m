@@ -6,7 +6,7 @@
    %con - less WM data points (still 48 per participant), may be too
    %diffcult for AD
 
-function dataOrg2
+function dataOrg3
 
 sjStart=input('Input first subject ');
 sjEnd=input('Input last subject ');
@@ -50,7 +50,7 @@ for sj=1:size(sjRange,2)
                 fileLoad=['' sprintf('%s', filePath) '/' sprintf('%s',file)];
                 load(fileLoad);
 
-                dataStruct.visCond(vis).taskCond(task).cueCond(cue).allSj(sjNum).trials=trials;
+                dataStruct.visCond(vis).taskCond(task).cueCond(cue).allSj(sjNum).trials=numTrials;
                 dataStruct.visCond(vis).taskCond(task).cueCond(cue).allSj(sjNum).errorC=errorCom;
                 dataStruct.visCond(vis).taskCond(task).cueCond(cue).allSj(sjNum).errorO=errorOm;
                 dataStruct.visCond(vis).taskCond(task).cueCond(cue).allSj(sjNum).oriEff=oriEf;
@@ -92,7 +92,6 @@ for sj=1:size(sjRange,2)
     end
 end
 
-save('dataMat.mat','dataMat');
 dataFileName=['dataMat.sj' sprintf('%d',sjStart) '-sj' sprintf('%d',sjEnd) '.mat'];
 save(dataFileName,'dataMat');
 
@@ -149,17 +148,10 @@ for var=1:numVars
     elseif vars2graph(1,var)==9
         varName='Working Memory Accuracy (letters in any order)';
     end
-    
-    %subplot function
-    %cue validities 80% and 20%
-    
-    xlabel=categorical({'Dots Single 100%','Dots Single 50%','Dots Dual 100%','Dots Dual 50%',...
-        'Neutral Single 100%','Neutral Single 50%','Neutral Dual 100%','Neutral Dual 50%',...
-        'Stroop Single 100%','Stroop Single 50%','Stroop Dual 100%','Stroop Dual 50%'});
-    bar(xlabel,bins);
-    
+
+    bar(bins);
+    xlabel='Experimental Condition';
     ylabel(varName,'FontSize',12);
-    
     file=['/Users/dannytoomey/Documents/Research/ADTask/ADTaskPilot/data/dataRun/graphs/' sprintf('%s',varName)];
     saveas(gcf,file,'png');
     
